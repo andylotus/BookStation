@@ -30,7 +30,7 @@ import { reactive, ref } from "@vue/composition-api";  // ref 定义常量; reac
 
 export default {
     name:"Header",
-    setup(props, context){ // before running the component, setup will be executed. setup相当与beforecreate、created; props：来自爸爸的爱（父组件传入的内容）;context：当前组件拥有的内容
+    setup(props, context){ // setup相当与beforecreate、created; props：来自爸爸的爱（父组件传入的内容）;context：当前组件拥有的内容
 
       const headData = reactive({
         headers:[]
