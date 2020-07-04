@@ -19,6 +19,20 @@ app = Flask(__name__)
 
 app.config['JSON_AS_ASCII'] = False
 
+@app.route('/books_cates', methods=['GET'])
+def get_books_cates():
+    resData = {
+        "resCode": 0,
+        "data": [
+            {"id":0, "text": 'shouYe', "url": '/'},
+            {"id":1, "text": 'xuanHuan', "url": '/xuanhuan'},
+            {"id":2, "text": 'xiuZhen', "url": '/xiuzhen'},
+            {"id":3, "text": 'duShi', "url": '/dushi'},
+            {"id":4, "text": 'liShi', "url": '/lishi'},
+        ],
+        "message": '对本次请求的说明'
+    }
+    return jsonify(resData)
 
 @app.route('/', methods=['GET', 'POST']) # 路由
 def hello_world():
