@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from books import Book
 import json
 from settings import BOOK_LIST
+import re
 
 """
 接口说明：
@@ -21,6 +22,26 @@ app = Flask(__name__)
 
 app.config['JSON_AS_ASCII'] = False
 
+# 检查是否含有特殊字符
+def is_string_validate(str):
+    sub_str = re.sub(u"([^\u4e00-\u9fa5\u0030-\u0039\u0041-\u005a\u0061-\u007a])","",str)
+    if len(str) == len(sub_str):
+        # 说明合法
+        return False
+    else:
+        # 不合法
+        return True
+
+
+@app.errorhandler(404)
+def handler_404_error(err):
+    resData = {
+        "resCode": 404, # 非0即错误 1
+        "data": [],# 数据位置，一般为数组
+        "message": err
+    }
+    return jsonify(resData)
+
 
 @app.route('/books_cates', methods=['GET'])
 def get_books_cates():
@@ -36,7 +57,7 @@ def get_books_cates():
             {"id":6, "text": '科幻', "url":'/kehuan'},
             {"id":7, "text": '言情', "url":'/yanqing'},
             {"id":8, "text": '其他', "url":'/qita'},
-            {"id":9, "text": '完本', "url":'/wanben'},
+            {"id":9, "text": '完本', "url":'/quanben'},
         ],# 数据位置，一般为数组
         "message": '对本次请求的说明'
     }
@@ -45,10 +66,19 @@ def get_books_cates():
 # post man
 @app.route('/<string:book_cate>', methods=['POST'])
 def get_cates_infos(book_cate):
+    if is_string_validate(book_cate):
+        print("输入数据有错误")
+        resData = {
+            "resCode": 404, # 非0即错误 1
+            "data": [],# 数据位置，一般为数组
+            "message": '输入数据有错误'
+        }
+        return jsonify(resData)
+
     if request.method == 'POST':
         print("捕获到了post请求 book_cate", book_cate)
         get_data = json.loads(request.get_data(as_text=True))
-        key = get_data['key'] #from read.js >>GetInfoPost
+        key = get_data['key']
         print("key = ", key)
         secretKey = get_data['secretKey']
         if book_cate in BOOK_LIST:
@@ -67,7 +97,16 @@ def get_cates_infos(book_cate):
                 return jsonify(resData)
             elif key == 'most':
                 print("most")
-                pass
+                book = Book()
+                sql_data = book.get_cates_most_books_30(book_cate)
+                resData = {
+                    "resCode": 0, # 非0即错误 1
+                    "data": sql_data,# 数据位置，一般为数组
+                    "message": '最新的30本图书信息查询结果'
+                }
+                return jsonify(resData)
+
+
             else:
                 resData = {
                     "resCode": 2, # 非0即错误 1
@@ -87,7 +126,69 @@ def get_cates_infos(book_cate):
         return jsonify(resData)
 
 
-
+# 图书首页信息
+# todo 没有对用户的输入进行检测
+# 用户输入错误
+@app.route('/book/<int:book_id>', methods=['POST'])
+def get_book_infos_by_id(book_id):
+    if request.method == 'POST':
+        get_data = json.loads(request.get_data(as_text=True))
+        key = get_data['key']
+        secretKey = get_data['secretKey']
+        book = Book()
+        sql_data = book.get_book_infos_by_book_id(book_id)
+        if key == 'index':
+            resData = {
+                "resCode": 0, # 非0即错误 1
+                "data": sql_data,# 数据位置，一般为数组
+                "message": '图书的信息'
+            }
+            return jsonify(resData)
+        elif key == "cap20":
+            if len(sql_data) == 0:
+                resData = {
+                    "resCode": 5, # 非0即错误 1
+                    "data": [],# 数据位置，一般为数组
+                    "message": '图书不存在'
+                }
+                return jsonify(resData)
+            cap_20_data = book.get_book_newest_20_caps_by_book_id(book_id)
+            resData = {
+                "resCode": 0, # 非0即错误 1
+                "data": cap_20_data,# 数据位置，一般为数组
+                "message": '最新的20章内容'
+            }
+            return jsonify(resData)
+        elif key == "all":
+            if len(sql_data) == 0:
+                resData = {
+                    "resCode": 5, # 非0即错误 1
+                    "data": [],# 数据位置，一般为数组
+                    "message": '图书不存在'
+                }
+                return jsonify(resData)
+            all_cap_data = book.get_book_all_caps_by_book_id(book_id)
+            resData = {
+                "resCode": 0, # 非0即错误 1
+                "data": all_cap_data,# 数据位置，一般为数组
+                "message": '所有图书信息'
+            }
+            return jsonify(resData)
+        else:
+            resData = {
+                "resCode": 1, # 非0即错误 1
+                "data": [],# 数据位置，一般为数组
+                "message": '参数错误'
+            }
+            return jsonify(resData)
+        # book_infos
+    else:
+        resData = {
+            "resCode": 1, # 非0即错误 1
+            "data": [],# 数据位置，一般为数组
+            "message": '请求方法错误'
+        }
+        return jsonify(resData)
 
 
 
