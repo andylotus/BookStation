@@ -1,22 +1,20 @@
 <template>
     <div id="BookIndex">
         <Header />
-        {{ items.indexItems.length }}
-        <b-container>
-            <div v-if="items.indexItems.length == 1">
-                <b-row>
+            <b-container class="mt-4" v-if="items.indexItems.length == 1">
+                <b-row class="mb-3">
                     <b-col clos="12" md="4"> <!-- 放图片 -->
-                        <b-img thumbnail fluid src="https://picsum.photos/250/250/?image=54" alt="Image 1"></b-img>
+                        <b-img thumbnail fluid class="p-3" style="width:80%; margin-left:10%" :src="items.indexItems[0].image_urls" alt="Image 1"></b-img>
                     </b-col>
                     <b-col  clos="12" md="8"> <!-- 放图书信息 -->
                         
-                            <b-jumbotron header-level="0">
-                                <template v-slot:header>{{ items.indexItems[0].book_name }}</template>
+                            <b-jumbotron header-level="0" class="pt-3">
+                                <template v-slot:header class="mt-1 mb-3">{{ items.indexItems[0].book_name }}</template>
 
-                                <div>作者：{{ items.indexItems[0].book_author }}</div>
-                                <div>最新章节：{{ items.indexItems[0].book_newest_name }}</div>
-                                <div>最新更新时间：{{ dateFormat(items.indexItems[0].book_last_update_time) }}</div>
-                                <div>本书状态：{{ items.indexItems[0].book_status }}</div>
+                                <div class="mb-3">作者：{{ items.indexItems[0].book_author }}</div>
+                                <div class="mb-3">最新章节：{{ items.indexItems[0].book_newest_name }}</div>
+                                <div class="mb-3">最新更新时间：{{ dateFormat(items.indexItems[0].book_last_update_time) }}</div>
+                                <div class="mb-3">本书状态：{{ items.indexItems[0].book_status }}</div>
 
                                 
 
@@ -26,7 +24,7 @@
                                 </p>
 
 
-                                <b-button pill variant="primary" class="left"  style="float:left; margin-left:5px" :href="'/book/'+items.indexItems[0].book_id+'/'">开始阅读</b-button>
+                                <b-button pill variant="primary" class="left"  style="float:left; margin-left:5px" :href="'/book/'+items.indexItems[0].book_id+'/'+ items.allCapItems[0].sort_id">开始阅读</b-button>
                                 <b-button pill variant="success" class="right" style="float:right; margin-right:5px"  href="#">加入收藏夹</b-button>
                             </b-jumbotron>
                             
@@ -34,31 +32,30 @@
                     </b-col>
                 </b-row>
 
-                <b-row>
-                    <b-col><h6>最近更新的20章图书</h6></b-col> 
+                <b-row class="mb-2">
+                    <b-col class="normal-center"><h4>最近更新的20章图书</h4></b-col> 
                 </b-row>
-                <b-row>
+                <b-row class="mb-4">
                     <b-col clos="12" md="4" v-for="item in items.newest20CapItems" :key="item.id"><a :href="'/book/'+item.book_id+'/'+item.sort_id ">{{ item.detail_title }}</a></b-col>
                 </b-row>
 
 
-                <b-row>
-                    <b-col><h6>所有章节的内容</h6></b-col>
+                <b-row class="mb-2 ">
+                    <b-col class="normal-center"><h4>所有章节的内容</h4></b-col>
                 </b-row>
-                <b-row>
+                <b-row class="mb-2">
                     <b-col clos="12" md="4" v-for="item in items.allCapItems" :key="item.id"><a :href="'/book/'+item.book_id+'/'+item.sort_id ">{{ item.detail_title }}</a></b-col>
                     
                 </b-row>
 
                
-            </div>
-            <div v-else>
+            </b-container>
+            <b-container class="mt-4" v-else>
                         哦哦，您要查看的图书不存在
-            </div>
+            </b-container>
 
             
 
-        </b-container>
        <Footer />
     </div>
 </template>
@@ -73,7 +70,9 @@ import Footer from "../components/Footer.vue";
 import { GetInfoPost } from "../apis/read.js";
 import { reactive, ref, onMounted } from "@vue/composition-api";
 import dateFormat from "../utils/date.js";
- 
+// import 的时候什么时候没有{}： export default 出现在最后一行的时候，就没有{}
+// 什么时候有{}: export 很多个fanctions的时候，就有{}
+
 export default {
     name:'BookIndex',
     components:{
